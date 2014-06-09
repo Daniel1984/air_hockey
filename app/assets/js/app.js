@@ -3,8 +3,8 @@ var Engine = require('./engine');
 
 window.AH = {
   device: parser(navigator.userAgent).device.type,
-  wWidth: window.innerWidth,
-  wHeight: window.innerHeight,
+  wWidth: screen.availWidth,
+  wHeight: screen.availHeight,
 
   isMobile: function() {
     if(AH.device && AH.device === 'mobile') return true;
@@ -13,7 +13,7 @@ window.AH = {
 
   getWidth: function() {
     if(AH.isMobile() || AH.wWidth < 720) return AH.wWidth;
-    return 720;
+    return 600;
   },
 
   getHeight: function() {
@@ -24,5 +24,7 @@ window.AH = {
 
 window.addEventListener('load', function() {
   if(!AH.isMobile()) document.body.className = 'desktop';
-  new Engine();
+  var game = new Engine();
+  this.addEventListener('resize', game.resize, false);
+  this.addEventListener('orientationchange', game.resize, false);
 }, false);

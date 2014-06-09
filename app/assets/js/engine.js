@@ -1,11 +1,14 @@
 (function() {
   'use strict';
 
-  var PIXI = require('pixi.js');
+  var PIXI = require('pixi.js'),
+      AssetLoader = require('./asset_loader'),
+      Board = require('./canvas/board/main');
 
   function Main() {
     PIXI.Stage.call(this, 0x000000, true);
     this.setupCanvas();
+    this.loadAssets();
     this.initGameLoop();
   }
 
@@ -17,10 +20,30 @@
     document.body.appendChild(this.renderer.view);
   };
 
+  Main.prototype.loadAssets = function() {
+    AssetLoader.onComplete = this.onDoneLoadingAssets.bind(this);
+    AssetLoader.load();
+  };
+  
+  Main.prototype.onDoneLoadingAssets = function() {
+    this.addChild(new Board());
+  };
+
   Main.prototype.initGameLoop = function() {
     requestAnimFrame(this.initGameLoop.bind(this));
     this.children.forEach(function(child) { child.update(); });
     this.renderer.render(this);
+  };
+
+  Main.prototype.resize = function() {
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    var ow = 640; // your stage width
+    var oh = 480; // your stage height
+    var scale = Math.min(w / ow, h / oh);
+    var canvas = document.getElementsByTagName('canvas')[0];
+    canvas.width = ow * scale;
+    canvas.height = oh * scale;
   };
 
   module.exports = Main;
