@@ -3,8 +3,8 @@ var Engine = require('./engine');
 
 window.AH = {
   device: parser(navigator.userAgent).device.type,
-  wWidth: screen.availWidth,
-  wHeight: screen.availHeight,
+  wWidth: window.innerWidth,
+  wHeight: window.innerHeight,
 
   isMobile: function() {
     if(AH.device && AH.device === 'mobile') return true;
@@ -12,13 +12,11 @@ window.AH = {
   },
 
   getWidth: function() {
-    if(AH.isMobile() || AH.wWidth < 720) return AH.wWidth;
-    return 600;
+    return AH.wWidth;
   },
 
   getHeight: function() {
-    if(AH.isMobile() || AH.wHeight < 640) return AH.wHeight;
-    return 640;
+    return AH.wHeight;
   }
 };
 

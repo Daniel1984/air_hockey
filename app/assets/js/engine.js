@@ -17,7 +17,7 @@
 
   Main.prototype.setupCanvas = function() {
     this.renderer = PIXI.autoDetectRenderer(AH.getWidth(), AH.getHeight());
-    document.body.appendChild(this.renderer.view);
+    document.body.appendChild(this.renderer.view); 
   };
 
   Main.prototype.loadAssets = function() {
@@ -36,14 +36,7 @@
   };
 
   Main.prototype.resize = function() {
-    var w = window.innerWidth;
-    var h = window.innerHeight;
-    var ow = 640; // your stage width
-    var oh = 480; // your stage height
-    var scale = Math.min(w / ow, h / oh);
-    var canvas = document.getElementsByTagName('canvas')[0];
-    canvas.width = ow * scale;
-    canvas.height = oh * scale;
+
   };
 
   module.exports = Main;

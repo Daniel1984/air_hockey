@@ -19,17 +19,20 @@
   function Board() {
     var texture = PIXI.Texture.fromImage("app/assets/img/raw/board_01.png");
     PIXI.TilingSprite.call(this, texture);
-    this.width = AH.getWidth();
-    this.height = AH.getHeight();
+    this.width = texture.width;
+    this.height = texture.height;
+    this.position.x = AH.getWidth() / 2 - this.width / 2;
+    this.scaleToFitScreen();
+    window.shait = this;
   }
 
   Board.prototype = Object.create(PIXI.Sprite.prototype);
   Board.prototype.constructor = Board;
 
   Board.prototype.scaleToFitScreen = function() {
-//    if(FP.getHeight() > this.texture.height) {
-//      this.scale.y = FP.getHeight() / this.texture.height;
-//    }
+    var scale = AH.getHeight() / this.height; 
+    console.log(scale);
+    this.scale.y = scale;
   };
 
   Board.prototype.update = function() { };
@@ -58,7 +61,7 @@
 
   Main.prototype.setupCanvas = function() {
     this.renderer = PIXI.autoDetectRenderer(AH.getWidth(), AH.getHeight());
-    document.body.appendChild(this.renderer.view);
+    document.body.appendChild(this.renderer.view); 
   };
 
   Main.prototype.loadAssets = function() {
@@ -77,14 +80,7 @@
   };
 
   Main.prototype.resize = function() {
-    var w = window.innerWidth;
-    var h = window.innerHeight;
-    var ow = 640; // your stage width
-    var oh = 480; // your stage height
-    var scale = Math.min(w / ow, h / oh);
-    var canvas = document.getElementsByTagName('canvas')[0];
-    canvas.width = ow * scale;
-    canvas.height = oh * scale;
+
   };
 
   module.exports = Main;
@@ -97,8 +93,8 @@ var Engine = require('./engine');
 
 window.AH = {
   device: parser(navigator.userAgent).device.type,
-  wWidth: screen.availWidth,
-  wHeight: screen.availHeight,
+  wWidth: window.innerWidth,
+  wHeight: window.innerHeight,
 
   isMobile: function() {
     if(AH.device && AH.device === 'mobile') return true;
@@ -106,13 +102,11 @@ window.AH = {
   },
 
   getWidth: function() {
-    if(AH.isMobile() || AH.wWidth < 720) return AH.wWidth;
-    return 600;
+    return AH.wWidth;
   },
 
   getHeight: function() {
-    if(AH.isMobile() || AH.wHeight < 640) return AH.wHeight;
-    return 640;
+    return AH.wHeight;
   }
 };
 
