@@ -1,10 +1,9 @@
 var parser = require('user-agent-parser');
 var Engine = require('./engine');
+var _ = require('underscore');
 
 window.AH = {
   device: parser(navigator.userAgent).device.type,
-  wWidth: window.innerWidth,
-  wHeight: window.innerHeight,
 
   isMobile: function() {
     if(AH.device && AH.device === 'mobile') return true;
@@ -12,17 +11,23 @@ window.AH = {
   },
 
   getWidth: function() {
-    return AH.wWidth;
+    return window.innerWidth;
   },
 
   getHeight: function() {
-    return AH.wHeight;
+    return window.innerHeight;
   }
 };
 
 window.addEventListener('load', function() {
   if(!AH.isMobile()) document.body.className = 'desktop';
   var game = new Engine();
-  this.addEventListener('resize', game.resize, false);
-  this.addEventListener('orientationchange', game.resize, false);
+
+  var updateLayout = _.debounce(function(e) {
+    game.updateLayout();
+  }, 500);
+
+//  this.addEventListener('resize', updateLayout, false);
+//  this.addEventListener('orientationchange', updateLayout, false);
+
 }, false);

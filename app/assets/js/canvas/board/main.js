@@ -8,18 +8,17 @@
     PIXI.TilingSprite.call(this, texture);
     this.width = texture.width;
     this.height = texture.height;
-    this.position.x = AH.getWidth() / 2 - this.width / 2;
-    this.scaleToFitScreen();
-    window.shait = this;
+    this.updateLayout();
   }
 
   Board.prototype = Object.create(PIXI.Sprite.prototype);
   Board.prototype.constructor = Board;
 
-  Board.prototype.scaleToFitScreen = function() {
+  Board.prototype.updateLayout = function() {
     var scale = AH.getHeight() / this.height; 
-    console.log(scale);
     this.scale.y = scale;
+    this.scale.x = scale;
+    this.position.x = AH.getWidth() / 2 - this.width / 2;
   };
 
   Board.prototype.update = function() { };
