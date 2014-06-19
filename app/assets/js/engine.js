@@ -4,7 +4,9 @@
   var PIXI = require('pixi.js'),
       AssetLoader = require('./asset_loader'),
       Board = require('./canvas/board/main'),
-      BorderMc = require('./canvas/board_border/main');
+      BorderMc = require('./canvas/board_border/main'),
+      PuckMc = require('./canvas/puck/main'),
+      HandleMc = require('./canvas/handle/main');
 
   function Main() {
     PIXI.Stage.call(this, 0x000000, true); 
@@ -31,6 +33,9 @@
     this.leftBorder = new BorderMc({ position: 'left' });
     this.rightBorder = new BorderMc({ position: 'right' });
     this.addChild(this.board);
+    this.addChild(new PuckMc());
+    this.addChild(new HandleMc({ handle_type: 'enemy' }));
+    this.addChild(new HandleMc({ handle_name: 'handle_orange', glow_handle_name: 'handle_orange_glow'  }));
     this.addChild(this.leftBorder);
     this.addChild(this.rightBorder);
     this.initGameLoop();

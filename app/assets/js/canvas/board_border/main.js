@@ -18,14 +18,12 @@
   Border.prototype.constructor = Border;
 
   Border.prototype.updateLayout = function() {
-    var scale = AH.getHeight() / this.height;  
-    this.scale.y = scale;
-    this.scale.x = scale; 
+    this.scale.y = this.scale.x = AH.getScale(); 
   };
 
   Border.prototype.repositionEl = function() {
     this.pivot.y = this.pivot.x = 0.5;
-    this.rotation = this.options.position === 'right' ? 3.14 : 0;
+    this.rotation = this.options.position === 'right' ? Math.PI : 0;
     this.position.x = AH.getWidth() / 2 - (this.options.position === 'left' ? this.width : -this.width);
     this.position.y = this.options.position === 'right' ? AH.getHeight() : 0;
   };
