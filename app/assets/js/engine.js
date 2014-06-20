@@ -29,15 +29,13 @@
   };
   
   Main.prototype.onDoneLoadingAssets = function() {
-    this.board = new Board();
-    this.leftBorder = new BorderMc({ position: 'left' });
-    this.rightBorder = new BorderMc({ position: 'right' });
-    this.addChild(this.board);
-    this.addChild(new PuckMc());
-    this.addChild(new HandleMc({ handle_type: 'enemy' }));
-    this.addChild(new HandleMc({ handle_name: 'handle_orange', glow_handle_name: 'handle_orange_glow'  }));
-    this.addChild(this.leftBorder);
-    this.addChild(this.rightBorder);
+    var puck = new PuckMc();
+    this.addChild(new Board());
+    this.addChild(puck);
+    this.addChild(new HandleMc({ handle_type: 'enemy', puck: puck }));
+    this.addChild(new HandleMc({ handle_name: 'handle_orange', puck: puck, glow_handle_name: 'handle_orange_glow' }));
+    this.addChild(new BorderMc({ position: 'left' }));
+    this.addChild(new BorderMc({ position: 'right' }));
     this.initGameLoop();
   };
 
