@@ -48,6 +48,10 @@ window.AH = {
   gtpb: function() {
     // get top player bound
     return AH.getGameHeight() / 2;
+  },
+  gtb: function() {
+    // get top bound
+    return AH.getTopBorder();
   }
 };
 

@@ -90,50 +90,43 @@
     this.repositionEl();
     this.setupInteraction();
     this.active = false;
-    this.touch_start_x = null;
-    this.touch_start_y = null;
-    this.tousch_start_time = null;
-    this.touch_end_time = null;
     this.radius = this.width / 2 - 6; // -6 is to bring objects closer as sprite considers glow
     this.puckRadius = this.puck.width / 2 - 6;
+    this.resetTstCount = 0;
   }
 
   Handle.prototype = Object.create(PIXI.MovieClip.prototype);
   Handle.prototype.constructor = Handle;
 
   Handle.prototype.getTextures = function() {
-    var textures = [
+    return [
       PIXI.Texture.fromFrame('app/assets/img/raw/' + (this.options.handle_name || 'handle_blue') + '.png'),
       PIXI.Texture.fromFrame('app/assets/img/raw/' + (this.options.glow_handle_name || 'handle_blue_glow') + '.png') 
     ];
-    return textures;
   };
 
   Handle.prototype.repositionEl = function() {
     this.scale.x = this.scale.y = AH.getScale();
     this.anchor.x = this.anchor.y = 0.5;
     this.position.x = AH.getWidth() / 2;
-    this.position.y = this.options.handle_type === 'enemy' ? this.height : AH.getHeight() - this.height;
+    this.position.y = this.options.handle_type === 'enemy' ? this.height : (AH.getHeight() - this.height);
   };
 
-//speed = distance / time
-//acceleration = speed / time
-
   Handle.prototype.setupInteraction = function() {
-    if(this.options.handle_type !== 'enemy') {
-      this.setInteractive(true);
-      this.mousedown = this.touchstart = this.onTouchStart;
-      this.mousemove = this.touchmove = this.onTouchMove;
-      this.mouseup = this.touchend = this.onTouchEnd;
-    }
+    if(this.options.handle_type === 'enemy') return;
+    this.setInteractive(true);
+    this.mousedown = this.touchstart = this.onTouchStart;
+    this.mousemove = this.touchmove = this.onTouchMove;
+    this.mouseup = this.touchend = this.onTouchEnd;
   };
 
   Handle.prototype.onTouchStart = function(e) {
     this.glowOn();
     this.active = true;
-    this.touch_start_x = e.global.x;
-    this.touch_start_y = e.global.y;
-    this.touch_start_time = Date.now();
+    // touch start x
+    this.tsx = e.global.x;
+    // touch start y
+    this.tsy = e.global.y;
   };
 
   Handle.prototype.onTouchMove = function(e) {
@@ -145,20 +138,26 @@
   Handle.prototype.restrictMovement = function(e) {
     var x = e.global.x;
     var y = e.global.y; 
-    if(x > AH.glpb() + this.width / 2 && x < AH.grpb() - this.width / 2) {
-      this.position.x = e.global.x; 
-    }
-    if(y > AH.gtpb() + this.height / 2 && y < AH.gbpb() - this.height / 2) {
-      this.position.y = e.global.y;
-    }
+    if(x > AH.glpb() + this.width / 2 && x < AH.grpb() - this.width / 2) this.position.x = e.global.x;
+    if(y > AH.gtpb() + this.height / 2 && y < AH.gbpb() - this.height / 2) this.position.y = e.global.y;
+    if(x < AH.glpb()) this.position.x = AH.glpb() + this.width / 2;
+    if(x > AH.grpb()) this.position.x = AH.grpb() - this.width / 2;
+    if(y < AH.gtpb()) this.position.y = AH.gtpb() + this.height / 2;
+    if(y > AH.gbpb()) this.position.y = AH.gbpb() - this.height / 2;
   };
 
   Handle.prototype.detectPuckCollision = function() {
-    var pp = this.puck.position;
-    var tp = this.position;
-    var d = Math.sqrt(((tp.x - pp.x) * (tp.x - pp.x)) + ((tp.y - pp.y) * (tp.y - pp.y)));
-    if (d < (this.radius + this.puckRadius)) {
-      console.log('ssssssssssssssssssssssssssss');
+    var ppy = this.puck.position.y;
+    var ppx = this.puck.position.x;
+    var tpy = this.position.y;
+    var tpx = this.position.x;
+    var tpxmppx = tpx - ppx;
+    var tpymppy = tpy - ppy;
+    var d = Math.sqrt(tpxmppx * tpxmppx + tpymppy * tpymppy);
+    if (d <= this.radius + this.puckRadius) {
+      var velocity = Math.sqrt((Math.pow((tpy-this.tsy), 2) + Math.pow((tpx-this.tsx), 2)));
+      var angle = Math.atan((tpy-this.tsy)/(tpx-this.tsx));
+      this.puck.applySpeed(velocity / 2, angle);
     }
   };
 
@@ -187,16 +186,23 @@
 
   function Puck(options) {
     this.options = options; 
-    var puckTextures = [
-      PIXI.Texture.fromFrame('app/assets/img/raw/puck_black.png'),
-      PIXI.Texture.fromFrame('app/assets/img/raw/puck_black_glow.png')];
-    PIXI.MovieClip.call(this, puckTextures);
-    this.gotoAndStop(1);
+    PIXI.MovieClip.call(this, this.getTextures());
+    this.friction = 0.02;
     this.repositionEl();
+    this.radius = this.width / 2;
+    this.velocityy = 0;
+    this.velocityx = 0;
   }
 
   Puck.prototype = Object.create(PIXI.MovieClip.prototype);
   Puck.prototype.constructor = Puck;
+
+  Puck.prototype.getTextures = function() {
+    return [
+      PIXI.Texture.fromFrame('app/assets/img/raw/puck_black_glow.png'),
+      PIXI.Texture.fromFrame('app/assets/img/raw/puck_black.png') 
+    ];
+  };
 
   Puck.prototype.repositionEl = function() {
     var scale = AH.getScale();
@@ -204,6 +210,41 @@
     this.anchor.x = this.anchor.y = 0.5;
     this.position.x = AH.getWidth() / 2;
     this.position.y = AH.getHeight() / 2;
+  };
+
+  Puck.prototype.applySpeed = function(speed, angle) {
+    this.velocityx = Math.cos(angle) * speed;
+    this.velocityy = Math.sin(angle) * speed;
+  };
+
+  Puck.prototype.update = function() {
+    console.log('X - ', this.position.x);
+    console.log('Y - ', this.position.y);
+    this.updatePosition();
+    this.testWalls();
+  };
+
+  Puck.prototype.updatePosition = function() {
+    this.velocityx = this.velocityx - this.velocityx * this.friction;
+    this.velocityy = this.velocityy - this.velocityy * this.friction; 
+    this.position.x = this.position.x += this.velocityx;
+    this.position.y = this.position.y += this.velocityy;
+  }; 
+
+  Puck.prototype.testWalls = function() {
+    if(this.position.x + this.radius > AH.grpb()) {
+      this.velocityx = this.velocityx * -1;
+      this.position.x = AH.grpb() - this.radius;                 
+    } else if(this.position.x - this.radius < AH.glpb()) {
+      this.velocityx = this.velocityx * -1;
+      this.position.x = AH.glpb() + this.radius;
+    } else if(this.position.y + this.radius > AH.gbpb()) {
+      this.velocityy = this.velocityy * -1;
+      this.position.y = AH.gbpb() - this.radius;
+    } else if(this.position.y - this.radius < AH.gtb()) {
+      this.velocityy = this.velocityy * -1;
+      this.position.y = AH.gtb() + this.radius;
+    }
   };
 
   Puck.prototype.glowOn = function() {
@@ -331,6 +372,10 @@ window.AH = {
   gtpb: function() {
     // get top player bound
     return AH.getGameHeight() / 2;
+  },
+  gtb: function() {
+    // get top bound
+    return AH.getTopBorder();
   }
 };
 
